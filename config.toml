@@ -1,7 +1,7 @@
 [irc]
 nickname = "ZBot"
 server = "irc.supernets.org"
-channels = ["#zbot"]
+channels = ["#superbowl"]
 # Optional fields:
 # password = "your_password"
 port = 6697
@@ -14,7 +14,7 @@ games_dir = "./games"
 
 [commands]
 # All fields are optional and have defaults
-prefix = "!"           # Default: "!"
+prefix = "`"           # Default: "`"
 games = "games"        # Default: "games"
 play = "play"         # Default: "play"
 end = "end"           # Default: "end"

@@ -1367,6 +1367,11 @@ impl Zmachine {
             (VAR_243, &[_number]) => (), // output_stream - no-op for now
             (VAR_244, &[_number]) => (), // input_stream - no-op for now
             (VAR_245, &[_number, _effect]) => (), // sound_effect - no-op for now
+            (VAR_246, _) => {
+                // Store current instruction for later - similar to sread
+                self.paused_instr = Some(instr.clone());
+                self.current_state = Some(("".to_string(), Vec::new()));
+            },
             (VAR_249, _) if !args.is_empty() => self.do_call(instr, args[0], &args[1..]), // call_vn
             (VAR_250, _) if !args.is_empty() => self.do_call(instr, args[0], &args[1..]), // call_vn2
             (VAR_251, &[text, parse]) => {
@@ -1591,13 +1596,28 @@ impl Zmachine {
             println!("[DEBUG] Found paused instruction: {:?}", instr);
             println!("[DEBUG] Instruction next addr: {:#x}", instr.next);
             
-            // Process the READ instruction with the input
-            self.do_sread_second(&instr.operands[0], &instr.operands[1], &input);
-            println!("[DEBUG] PC after do_sread_second: {:#x}", self.pc);
-            
-            // Explicitly advance PC to next instruction
-            self.pc = instr.next;
-            println!("[DEBUG] PC after explicit advance: {:#x}", self.pc);
+            match instr.opcode {
+                Opcode::VAR_228 => { // READ
+                    // Process the READ instruction with the input
+                    self.do_sread_second(&instr.operands[0], &instr.operands[1], &input);
+                    println!("[DEBUG] PC after do_sread_second: {:#x}", self.pc);
+                    
+                    // Explicitly advance PC to next instruction
+                    self.pc = instr.next;
+                    println!("[DEBUG] PC after explicit advance: {:#x}", self.pc);
+                }
+                Opcode::VAR_246 => { // READ_CHAR
+                    // Get the first character's ASCII value, or 0 if empty input
+                    let char_code = input.chars().next().map(|c| c as u16).unwrap_or(0);
+                    println!("[DEBUG] read_char got input '{}', returning char code {}", input, char_code);
+                    // Store the result and advance PC
+                    self.process_result(&instr, char_code);
+                    println!("[DEBUG] PC after processing read_char: {:#x}", self.pc);
+                }
+                _ => {
+                    self.handle_instruction(&instr);
+                }
+            }
             
             // Continue executing instructions until we need more input or complete
             while !self.step() {
@@ -2214,6 +2234,13 @@ impl Zmachine {
             Opcode::VAR_228 => { // READ
                 self.do_sread_second(&instr.operands[0], &instr.operands[1], &input);
                 self.pc = instr.next;
+            }
+            Opcode::VAR_246 => { // READ_CHAR
+                // Get the first character's ASCII value, or 0 if empty input
+                let char_code = input.chars().next().map(|c| c as u16).unwrap_or(0);
+                println!("[DEBUG] read_char got input '{}', returning char code {}", input, char_code);
+                // Store the result and advance PC
+                self.process_result(instr, char_code);
             }
             _ => {
                 self.handle_instruction(instr);
