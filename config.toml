@@ -1,0 +1,33 @@
+[irc]
+nickname = "ZBot"
+server = "irc.supernets.org"
+channels = ["#zbot"]
+# Optional fields:
+# password = "your_password"
+port = 6697
+use_tls = true
+
+[paths]
+# Optional fields with defaults:
+games_dir = "./games"
+# saves_dir = "save_states"
+
+[commands]
+# All fields are optional and have defaults
+prefix = "!"           # Default: "!"
+games = "games"        # Default: "games"
+play = "play"         # Default: "play"
+end = "end"           # Default: "end"
+reset = "reset"       # Default: "reset"
+command = "cmd"       # Default: "cmd"
+save = "save"         # Default: "save"
+load = "load"         # Default: "load"
+list_states = "states" # Default: "list_states"
+next = "next"                 # Default: "next"
+pagination_reset = "reset_page" # Default: "pagination_reset"
+help = "help"                 # Default: "help"
+
+# Debug commands
+debug = "debug"       # Show general debug info
+memory = "memory"     # Show memory dump
+stack = "stack"       # Show stack trace 
